@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { LadyProfile, GentlemanProfile, Tour } from './types';
-import { db } from './database';
+import { GentlemanProfile } from './types';
+import { useData } from './hooks/useData';
 import { Header, TopBar, Footer } from './components';
 import {
     HomePage,
@@ -22,28 +22,54 @@ const App: React.FC = () => {
     // Mobile menu state
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // Data state (from database)
-    const [ladies, setLadies] = useState<LadyProfile[]>(() => db.ladies.get());
-    const [gentlemen, setGentlemen] = useState<GentlemanProfile[]>(() => db.gentlemen.get());
-    const [tours, setTours] = useState<Tour[]>(() => db.tours.get());
-
-    // Persist changes to localStorage
-    useEffect(() => db.ladies.save(ladies), [ladies]);
-    useEffect(() => db.gentlemen.save(gentlemen), [gentlemen]);
-    useEffect(() => db.tours.save(tours), [tours]);
+    // Data state (from API with localStorage fallback)
+    const {
+        ladies,
+        tours,
+        loading,
+        useApi,
+        setLadies,
+        setTours,
+        registerGentleman
+    } = useData();
 
     // Scroll to top on route change
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const handleRegister = (newMan: GentlemanProfile) => {
-        setGentlemen(prev => [...prev, newMan]);
+    const handleRegister = async (newMan: Omit<GentlemanProfile, 'id' | 'registrationDate'>) => {
+        try {
+            await registerGentleman(newMan);
+            return true;
+        } catch (err) {
+            console.error('Registration failed:', err);
+            return false;
+        }
     };
+
+    // Show loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#f1f3f5]">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E8475F] mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <BrowserRouter>
             <div className="min-h-screen flex flex-col font-sans bg-[#f1f3f5]">
+                {/* API Status Indicator (dev only) */}
+                {import.meta.env.DEV && (
+                    <div className={`fixed bottom-4 right-4 z-50 px-3 py-1 rounded-full text-xs font-bold ${useApi ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'}`}>
+                        {useApi ? '🔌 API Connected' : '💾 LocalStorage'}
+                    </div>
+                )}
+
                 {/* Top Bar */}
                 <TopBar />
 

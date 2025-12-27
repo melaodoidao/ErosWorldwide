@@ -15,6 +15,7 @@ export interface LadyProfile {
 export interface GentlemanProfile {
   id: string;
   name: string;
+  email?: string;
   age: number;
   profession: string;
   location: string;

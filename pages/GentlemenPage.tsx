@@ -3,26 +3,36 @@ import { UserPlus, ShieldCheck, Heart, Plane, CheckCircle, ArrowRight } from 'lu
 import { GentlemanProfile } from '../types';
 
 interface GentlemenPageProps {
-    onRegister: (man: GentlemanProfile) => void;
+    onRegister: (man: Omit<GentlemanProfile, 'id' | 'registrationDate'>) => Promise<boolean> | void;
 }
 
 export const GentlemenPage: React.FC<GentlemenPageProps> = ({ onRegister }) => {
-    const [manForm, setManForm] = useState({ name: '', age: '', profession: '', location: '', bio: '' });
+    const [manForm, setManForm] = useState({ name: '', email: '', age: '', profession: '', location: '', bio: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const newMan: GentlemanProfile = {
-            id: Math.random().toString(36).substr(2, 9),
-            name: manForm.name,
-            age: parseInt(manForm.age) || 0,
-            profession: manForm.profession || 'Not Specified',
-            location: manForm.location || 'Not Specified',
-            bio: manForm.bio,
-            registrationDate: new Date().toLocaleDateString(),
-        };
-        onRegister(newMan);
-        setManForm({ name: '', age: '', profession: '', location: '', bio: '' });
-        alert("Introductory profile submitted successuly!");
+        setIsSubmitting(true);
+
+        try {
+            const result = await onRegister({
+                name: manForm.name,
+                email: manForm.email,
+                age: parseInt(manForm.age) || 0,
+                profession: manForm.profession || 'Not Specified',
+                location: manForm.location || 'Not Specified',
+                bio: manForm.bio,
+            });
+
+            if (result !== false) {
+                setManForm({ name: '', email: '', age: '', profession: '', location: '', bio: '' });
+                alert("Profile submitted successfully! We will contact you soon.");
+            }
+        } catch (err) {
+            alert("Registration failed. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -95,6 +105,20 @@ export const GentlemenPage: React.FC<GentlemenPageProps> = ({ onRegister }) => {
                                     />
                                 </div>
                                 <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Email Address</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={manForm.email}
+                                        onChange={e => setManForm({ ...manForm, email: e.target.value })}
+                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
+                                        placeholder="john@example.com"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
                                     <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Current Age</label>
                                     <input
                                         type="number"
@@ -107,52 +131,51 @@ export const GentlemenPage: React.FC<GentlemenPageProps> = ({ onRegister }) => {
                                         placeholder="35"
                                     />
                                 </div>
-                            </div>
 
-                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Profession</label>
+                                        <input
+                                            type="text"
+                                            value={manForm.profession}
+                                            onChange={e => setManForm({ ...manForm, profession: e.target.value })}
+                                            className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
+                                            placeholder="Software Engineer"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">City, Country</label>
+                                        <input
+                                            type="text"
+                                            value={manForm.location}
+                                            onChange={e => setManForm({ ...manForm, location: e.target.value })}
+                                            className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
+                                            placeholder="Chicago, USA"
+                                        />
+                                    </div>
+                                </div>
+
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Profession</label>
-                                    <input
-                                        type="text"
-                                        value={manForm.profession}
-                                        onChange={e => setManForm({ ...manForm, profession: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
-                                        placeholder="Software Engineer"
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">About Your Intentions</label>
+                                    <textarea
+                                        rows={4}
+                                        value={manForm.bio}
+                                        onChange={e => setManForm({ ...manForm, bio: e.target.value })}
+                                        className="w-full bg-gray-50 border border-gray-100 rounded-[2rem] px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all resize-none"
+                                        placeholder="What are you looking for in a partner?"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">City, Country</label>
-                                    <input
-                                        type="text"
-                                        value={manForm.location}
-                                        onChange={e => setManForm({ ...manForm, location: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
-                                        placeholder="Chicago, USA"
-                                    />
+
+                                <button
+                                    type="submit"
+                                    className="w-full bg-brand-rose text-white py-5 rounded-2xl font-bold text-lg hover:bg-brand-rose/90 transition-all shadow-xl shadow-brand-rose/20 flex items-center justify-center gap-2"
+                                >
+                                    Complete Registration <ArrowRight size={20} />
+                                </button>
+
+                                <div className="flex items-center gap-2 justify-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                    <CheckCircle size={12} className="text-[#10B981]" /> No Credit Card Required
                                 </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">About Your Intentions</label>
-                                <textarea
-                                    rows={4}
-                                    value={manForm.bio}
-                                    onChange={e => setManForm({ ...manForm, bio: e.target.value })}
-                                    className="w-full bg-gray-50 border border-gray-100 rounded-[2rem] px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all resize-none"
-                                    placeholder="What are you looking for in a partner?"
-                                />
-                            </div>
-
-                            <button
-                                type="submit"
-                                className="w-full bg-brand-rose text-white py-5 rounded-2xl font-bold text-lg hover:bg-brand-rose/90 transition-all shadow-xl shadow-brand-rose/20 flex items-center justify-center gap-2"
-                            >
-                                Complete Registration <ArrowRight size={20} />
-                            </button>
-
-                            <div className="flex items-center gap-2 justify-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                <CheckCircle size={12} className="text-[#10B981]" /> No Credit Card Required
-                            </div>
                         </form>
                     </div>
                 </div>

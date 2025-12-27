@@ -131,51 +131,51 @@ export const GentlemenPage: React.FC<GentlemenPageProps> = ({ onRegister }) => {
                                         placeholder="35"
                                     />
                                 </div>
-
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Profession</label>
-                                        <input
-                                            type="text"
-                                            value={manForm.profession}
-                                            onChange={e => setManForm({ ...manForm, profession: e.target.value })}
-                                            className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
-                                            placeholder="Software Engineer"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">City, Country</label>
-                                        <input
-                                            type="text"
-                                            value={manForm.location}
-                                            onChange={e => setManForm({ ...manForm, location: e.target.value })}
-                                            className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
-                                            placeholder="Chicago, USA"
-                                        />
-                                    </div>
-                                </div>
-
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">About Your Intentions</label>
-                                    <textarea
-                                        rows={4}
-                                        value={manForm.bio}
-                                        onChange={e => setManForm({ ...manForm, bio: e.target.value })}
-                                        className="w-full bg-gray-50 border border-gray-100 rounded-[2rem] px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all resize-none"
-                                        placeholder="What are you looking for in a partner?"
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">Profession</label>
+                                    <input
+                                        type="text"
+                                        value={manForm.profession}
+                                        onChange={e => setManForm({ ...manForm, profession: e.target.value })}
+                                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
+                                        placeholder="Software Engineer"
                                     />
                                 </div>
+                            </div>
 
-                                <button
-                                    type="submit"
-                                    className="w-full bg-brand-rose text-white py-5 rounded-2xl font-bold text-lg hover:bg-brand-rose/90 transition-all shadow-xl shadow-brand-rose/20 flex items-center justify-center gap-2"
-                                >
-                                    Complete Registration <ArrowRight size={20} />
-                                </button>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">City, Country</label>
+                                <input
+                                    type="text"
+                                    value={manForm.location}
+                                    onChange={e => setManForm({ ...manForm, location: e.target.value })}
+                                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all text-brand-navy"
+                                    placeholder="Chicago, USA"
+                                />
+                            </div>
 
-                                <div className="flex items-center gap-2 justify-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                                    <CheckCircle size={12} className="text-[#10B981]" /> No Credit Card Required
-                                </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2">About Your Intentions</label>
+                                <textarea
+                                    rows={4}
+                                    value={manForm.bio}
+                                    onChange={e => setManForm({ ...manForm, bio: e.target.value })}
+                                    className="w-full bg-gray-50 border border-gray-100 rounded-[2rem] px-6 py-4 text-sm focus:bg-white focus:border-brand-rose outline-none transition-all resize-none"
+                                    placeholder="What are you looking for in a partner?"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="w-full bg-brand-rose text-white py-5 rounded-2xl font-bold text-lg hover:bg-brand-rose/90 transition-all shadow-xl shadow-brand-rose/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Submitting...' : 'Complete Registration'} <ArrowRight size={20} />
+                            </button>
+
+                            <div className="flex items-center gap-2 justify-center text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                <CheckCircle size={12} className="text-[#10B981]" /> No Credit Card Required
+                            </div>
                         </form>
                     </div>
                 </div>

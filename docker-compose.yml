@@ -24,8 +24,12 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - DB_PATH=/app/data/eros.db
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - TEXT_MODEL=${TEXT_MODEL:-gemini-2.0-flash}
+      - IMAGE_MODEL=${IMAGE_MODEL:-gemini-2.0-flash-preview-image-generation}
     volumes:
       - eros-data:/app/data
+      - ./server/public/uploads:/app/public/uploads
     networks:
       - eros-network
 

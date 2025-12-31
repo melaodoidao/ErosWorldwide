@@ -7,8 +7,12 @@
         "dev": "node --watch index.js"
     },
     "dependencies": {
+        "@google/adk": "^0.2.0",
+        "@google/generative-ai": "^0.24.0",
         "better-sqlite3": "^11.7.0",
         "cors": "^2.8.5",
-        "express": "^4.21.2"
+        "dotenv": "^16.4.7",
+        "express": "^4.21.2",
+        "json5": "^2.2.3"
     }
 }

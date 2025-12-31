@@ -1,0 +1,12 @@
+export { HomePage } from './HomePage';
+export { LadiesPage } from './LadiesPage';
+export { ToursPage } from './ToursPage';
+export { TourDetailPage } from './TourDetailPage';
+export { TestimonialsPage } from './TestimonialsPage';
+export { OfficesPage } from './OfficesPage';
+export { FAQPage } from './FAQPage';
+export { PhilosophyPage } from './PhilosophyPage';
+export { LegalPage } from './LegalPage';
+export { ContactPage } from './ContactPage';
+export { AdminPage } from './AdminPage';
+export { GentlemenPage } from './GentlemenPage';

@@ -253,6 +253,80 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// AI Profile Generation (SSE endpoint)
+app.get('/api/ladies/generate-adk', async (req, res) => {
+    const attractiveness = parseInt(req.query.attractiveness) || 7;
+
+    // SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.flushHeaders();
+
+    const sendEvent = (data) => {
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
+    try {
+        // Dynamic import of the ADK generator (ESM)
+        const { generateLadyProfileADK } = await import('./dist/src/services/adkGenerator.js');
+
+        sendEvent({ type: 'progress', message: 'Initializing AI Generation Engine...' });
+
+        const profile = await generateLadyProfileADK(
+            null, // city (random)
+            null, // country (random)
+            attractiveness,
+            (step, partialProfile) => {
+                sendEvent({
+                    type: 'progress',
+                    message: step,
+                    profile: partialProfile
+                });
+            }
+        );
+
+        // Save to database
+        const id = profile.id || crypto.randomUUID();
+        db.prepare(`
+            INSERT INTO ladies (id, name, age, city, country, bio, image_url, verified, height, hair_color, eye_color)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+            id,
+            profile.name,
+            profile.age,
+            profile.city,
+            profile.country,
+            profile.bio,
+            profile.imageUrl || profile.idPhotoUrl,
+            1,
+            profile.height,
+            profile.hairColor,
+            profile.eyeColor
+        );
+
+        // Send complete event with full profile
+        sendEvent({
+            type: 'complete',
+            profile: {
+                ...profile,
+                id,
+                verified: true
+            }
+        });
+
+    } catch (error) {
+        console.error('[ADK Generation Error]', error);
+        sendEvent({ type: 'error', message: error.message });
+    } finally {
+        res.end();
+    }
+});
+
+// Serve uploaded images
+app.use('/uploads', express.static(join(__dirname, 'public/uploads')));
+
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Eros API running on port ${PORT}`);

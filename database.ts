@@ -1,10 +1,13 @@
 
 import { LadyProfile, GentlemanProfile, Tour } from './types';
+import { MBTIResult, MBTITestSession, MBTIAnswer } from './mbti/types';
 
 const STORAGE_KEYS = {
   LADIES: 'eros_worldwide_db_ladies',
   GENTLEMEN: 'eros_worldwide_db_men',
   TOURS: 'eros_worldwide_db_tours',
+  MBTI_SESSIONS: 'eros_worldwide_db_mbti_sessions',
+  CURRENT_USER: 'eros_worldwide_current_user',
 };
 
 const INITIAL_LADIES: LadyProfile[] = [
@@ -65,6 +68,75 @@ export const db = {
     reset: () => {
       localStorage.setItem(STORAGE_KEYS.TOURS, JSON.stringify(INITIAL_TOURS));
       return INITIAL_TOURS;
+    }
+  },
+
+  // MBTI Test Sessions
+  mbtiSessions: {
+    get: (userId: string): MBTITestSession | null => {
+      const data = localStorage.getItem(STORAGE_KEYS.MBTI_SESSIONS);
+      const sessions: Record<string, MBTITestSession> = data ? JSON.parse(data) : {};
+      return sessions[userId] || null;
+    },
+    save: (session: MBTITestSession) => {
+      const data = localStorage.getItem(STORAGE_KEYS.MBTI_SESSIONS);
+      const sessions: Record<string, MBTITestSession> = data ? JSON.parse(data) : {};
+      sessions[session.userId] = session;
+      localStorage.setItem(STORAGE_KEYS.MBTI_SESSIONS, JSON.stringify(sessions));
+    },
+    delete: (userId: string) => {
+      const data = localStorage.getItem(STORAGE_KEYS.MBTI_SESSIONS);
+      const sessions: Record<string, MBTITestSession> = data ? JSON.parse(data) : {};
+      delete sessions[userId];
+      localStorage.setItem(STORAGE_KEYS.MBTI_SESSIONS, JSON.stringify(sessions));
+    },
+    getAnswers: (userId: string): MBTIAnswer[] => {
+      const session = db.mbtiSessions.get(userId);
+      return session?.answers || [];
+    }
+  },
+
+  // Current user (for test-taking)
+  currentUser: {
+    get: (): { id: string; type: 'gentleman' | 'lady' } | null => {
+      const data = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
+      return data ? JSON.parse(data) : null;
+    },
+    set: (user: { id: string; type: 'gentleman' | 'lady' }) => {
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+    },
+    clear: () => {
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+    }
+  },
+
+  // MBTI Results - save to profile
+  mbtiResults: {
+    saveLadyResult: (ladyId: string, result: MBTIResult) => {
+      const ladies = db.ladies.get();
+      const index = ladies.findIndex(l => l.id === ladyId);
+      if (index !== -1) {
+        ladies[index].mbtiResult = result;
+        db.ladies.save(ladies);
+      }
+    },
+    saveGentlemanResult: (gentlemanId: string, result: MBTIResult) => {
+      const gentlemen = db.gentlemen.get();
+      const index = gentlemen.findIndex(g => g.id === gentlemanId);
+      if (index !== -1) {
+        gentlemen[index].mbtiResult = result;
+        db.gentlemen.save(gentlemen);
+      }
+    },
+    getLadyResult: (ladyId: string): MBTIResult | undefined => {
+      const ladies = db.ladies.get();
+      const lady = ladies.find(l => l.id === ladyId);
+      return lady?.mbtiResult;
+    },
+    getGentlemanResult: (gentlemanId: string): MBTIResult | undefined => {
+      const gentlemen = db.gentlemen.get();
+      const gentleman = gentlemen.find(g => g.id === gentlemanId);
+      return gentleman?.mbtiResult;
     }
   }
 };

@@ -9,3 +9,4 @@ export { LegalPage } from './LegalPage';
 export { ContactPage } from './ContactPage';
 export { AdminPage } from './AdminPage';
 export { GentlemenPage } from './GentlemenPage';
+export { PersonalityTestPage } from './PersonalityTestPage';

@@ -2,15 +2,52 @@ import React, { useState } from 'react';
 import {
     X, ShieldCheck, MapPin, Heart, Mail, Video, Calendar,
     Ruler, Eye, Briefcase, GraduationCap, Church, Baby,
-    Languages, Cigarette, Wine, ChevronLeft, ChevronRight
+    Languages, Cigarette, Wine, ChevronLeft, ChevronRight, Brain
 } from 'lucide-react';
-import { LadyProfile } from '../types';
+import { LadyProfile, GentlemanProfile } from '../types';
+import { MBTIResult, MBTIType, ALL_MBTI_TYPES } from '../mbti/types';
+import { getMBTITheme, getMBTIThemeClass } from '../mbti/colors';
+import { getMBTITypeInfo, getRelationshipDescription } from '../mbti/descriptions';
+import { calculateCompatibility, createCompatibilityMatch, getSharedStrengths, getPotentialChallenges } from '../mbti/compatibility';
+import { MBTIBadge } from './MBTIBadge';
+import { DimensionBars } from './DimensionBars';
+import { CompatibilityScore } from './CompatibilityScore';
 
 interface LadyProfileModalProps {
     lady: LadyProfile;
     onClose: () => void;
     onExpressInterest: (ladyId: string) => void;
+    currentUser?: GentlemanProfile | null;
 }
+
+// Assign MBTI types to ladies based on their ID for demo purposes
+const DEMO_MBTI_TYPES: MBTIType[] = ['ENFJ', 'INFP', 'ESFJ', 'ISFJ', 'ENFP', 'INFJ', 'ENTJ', 'INTJ', 'ESFP', 'ISFP', 'ESTJ', 'ISTJ'];
+
+const getDemoMBTIResult = (ladyId: string): MBTIResult => {
+    const index = parseInt(ladyId) % DEMO_MBTI_TYPES.length;
+    const type = DEMO_MBTI_TYPES[index];
+
+    // Generate somewhat realistic scores based on type
+    const getScore = (dominant: boolean) => dominant ? 60 + Math.floor(Math.random() * 30) : 40 - Math.floor(Math.random() * 30);
+
+    return {
+        type,
+        dimensionScores: {
+            E: type[0] === 'E' ? getScore(true) : getScore(false),
+            I: type[0] === 'I' ? getScore(true) : getScore(false),
+            S: type[1] === 'S' ? getScore(true) : getScore(false),
+            N: type[1] === 'N' ? getScore(true) : getScore(false),
+            T: type[2] === 'T' ? getScore(true) : getScore(false),
+            F: type[2] === 'F' ? getScore(true) : getScore(false),
+            J: type[3] === 'J' ? getScore(true) : getScore(false),
+            P: type[3] === 'P' ? getScore(true) : getScore(false),
+        },
+        testTier: 'full',
+        testCompletedAt: new Date().toISOString(),
+        questionsAnswered: 80,
+        confidence: 85 + Math.floor(Math.random() * 10),
+    };
+};
 
 // Extended profile data (simulated - in production would come from API)
 const getExtendedProfile = (lady: LadyProfile) => ({
@@ -36,13 +73,24 @@ const getExtendedProfile = (lady: LadyProfile) => ({
     memberSince: '2024',
     lastActive: '2 hours ago',
     profileViews: Math.floor(Math.random() * 500) + 100,
+    // Add MBTI result (use existing or generate demo)
+    mbtiResult: lady.mbtiResult || getDemoMBTIResult(lady.id),
 });
 
-export const LadyProfileModal: React.FC<LadyProfileModalProps> = ({ lady, onClose, onExpressInterest }) => {
+export const LadyProfileModal: React.FC<LadyProfileModalProps> = ({ lady, onClose, onExpressInterest, currentUser }) => {
     const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-    const [activeTab, setActiveTab] = useState<'about' | 'looking' | 'photos'>('about');
+    const [activeTab, setActiveTab] = useState<'about' | 'personality' | 'looking' | 'photos'>('about');
 
     const profile = getExtendedProfile(lady);
+
+    // Get MBTI theme for coloring
+    const mbtiTheme = profile.mbtiResult ? getMBTITheme(profile.mbtiResult.type) : null;
+    const mbtiTypeInfo = profile.mbtiResult ? getMBTITypeInfo(profile.mbtiResult.type) : null;
+
+    // Calculate compatibility if current user has taken test
+    const compatibilityMatch = (currentUser?.mbtiResult && profile.mbtiResult)
+        ? createCompatibilityMatch(lady.id, 'lady', currentUser.mbtiResult, profile.mbtiResult)
+        : null;
 
     const nextPhoto = () => setCurrentPhotoIndex((prev) => (prev + 1) % profile.photos.length);
     const prevPhoto = () => setCurrentPhotoIndex((prev) => (prev - 1 + profile.photos.length) % profile.photos.length);
@@ -172,15 +220,30 @@ export const LadyProfileModal: React.FC<LadyProfileModalProps> = ({ lady, onClos
                                 </div>
                             </div>
 
+                            {/* MBTI Badge in Header */}
+                            {profile.mbtiResult && (
+                                <div className="flex items-center gap-3 flex-wrap">
+                                    <MBTIBadge type={profile.mbtiResult.type} showLabel />
+                                    {compatibilityMatch && (
+                                        <span
+                                            className="px-3 py-1 rounded-full text-xs font-bold text-white"
+                                            style={{ backgroundColor: compatibilityMatch.compatibilityScore >= 70 ? '#10B981' : compatibilityMatch.compatibilityScore >= 50 ? '#3B82F6' : '#F59E0B' }}
+                                        >
+                                            {compatibilityMatch.compatibilityScore}% Match
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+
                             {/* Tabs */}
-                            <div className="flex border-b">
-                                {(['about', 'looking', 'photos'] as const).map((tab) => (
+                            <div className="flex border-b overflow-x-auto">
+                                {(['about', 'personality', 'looking', 'photos'] as const).map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
-                                        className={`py-3 px-6 font-black text-sm uppercase tracking-widest transition-all ${activeTab === tab ? 'border-b-4 border-brand-rose text-brand-navy' : 'text-slate-400'}`}
+                                        className={`py-3 px-4 font-black text-xs uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab ? 'border-b-4 border-brand-rose text-brand-navy' : 'text-slate-400'}`}
                                     >
-                                        {tab === 'about' ? 'About Me' : tab === 'looking' ? 'Looking For' : 'Gallery'}
+                                        {tab === 'about' ? 'About Me' : tab === 'personality' ? 'Personality' : tab === 'looking' ? 'Looking For' : 'Gallery'}
                                     </button>
                                 ))}
                             </div>
@@ -234,6 +297,57 @@ export const LadyProfileModal: React.FC<LadyProfileModalProps> = ({ lady, onClos
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'personality' && profile.mbtiResult && mbtiTypeInfo && (
+                                <div className="space-y-6">
+                                    {/* Type Header */}
+                                    <div
+                                        className="p-6 rounded-2xl text-white"
+                                        style={{ background: mbtiTheme?.gradient }}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <div className="text-3xl font-black tracking-wider">{profile.mbtiResult.type}</div>
+                                                <div className="text-lg opacity-90">{mbtiTypeInfo.name}</div>
+                                            </div>
+                                            <Brain size={48} className="opacity-50" />
+                                        </div>
+                                        <p className="mt-3 text-sm opacity-90">{mbtiTypeInfo.shortDescription}</p>
+                                    </div>
+
+                                    {/* Dimension Bars */}
+                                    <div>
+                                        <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-3">Personality Dimensions</h4>
+                                        <DimensionBars scores={profile.mbtiResult.dimensionScores} type={profile.mbtiResult.type} />
+                                    </div>
+
+                                    {/* In Relationships */}
+                                    <div>
+                                        <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-2">In Relationships</h4>
+                                        <p className="text-slate-600 text-sm leading-relaxed">{mbtiTypeInfo.inRelationships}</p>
+                                    </div>
+
+                                    {/* Compatibility Section */}
+                                    {compatibilityMatch ? (
+                                        <div className="border-t pt-6">
+                                            <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-4">Your Compatibility</h4>
+                                            <CompatibilityScore match={compatibilityMatch} showDetails size="lg" />
+                                        </div>
+                                    ) : (
+                                        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+                                            <div className="flex items-start gap-3">
+                                                <Brain size={24} className="text-blue-500 mt-0.5" />
+                                                <div>
+                                                    <h4 className="font-bold text-blue-800 mb-1">Take the Personality Test</h4>
+                                                    <p className="text-sm text-blue-700">
+                                                        Complete our personality assessment to see your compatibility score with {profile.name}!
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 

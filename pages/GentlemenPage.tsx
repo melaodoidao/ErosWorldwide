@@ -22,6 +22,7 @@ export const GentlemenPage: React.FC<GentlemenPageProps> = ({ onRegister }) => {
                 profession: manForm.profession || 'Not Specified',
                 location: manForm.location || 'Not Specified',
                 bio: manForm.bio,
+                verified: false,
             });
 
             if (result !== false) {

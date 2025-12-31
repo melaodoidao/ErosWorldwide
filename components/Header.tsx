@@ -11,6 +11,7 @@ const NAV_ITEMS = [
     { path: '/', label: 'The Journey' },
     { path: '/tours', label: 'Tour Dates' },
     { path: '/ladies', label: 'Verified Ladies' },
+    { path: '/personality', label: 'Personality Test' },
     { path: '/testimonials', label: 'Success Stories' },
     { path: '/offices', label: 'Offices' },
     { path: '/faq', label: 'FAQ' },

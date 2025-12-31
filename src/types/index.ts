@@ -2,6 +2,8 @@
 // EROS WORLDWIDE - Type Definitions
 // ========================================
 
+import { MBTIResult } from '../../mbti/types';
+
 // ===== LADY PROFILE =====
 export interface LadyProfile {
     id: string;
@@ -31,6 +33,8 @@ export interface LadyProfile {
     galleryImages?: string[];
     createdAt?: string;
     lastActive?: string;
+    // MBTI Personality
+    mbtiResult?: MBTIResult;
 }
 
 // ===== GENTLEMAN PROFILE =====
@@ -45,6 +49,8 @@ export interface GentlemanProfile {
     verified: boolean;
     registrationDate: string;
     passwordHash?: string;
+    // MBTI Personality
+    mbtiResult?: MBTIResult;
 }
 
 // ===== TOUR =====

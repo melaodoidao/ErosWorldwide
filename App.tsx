@@ -14,7 +14,8 @@ import {
     LegalPage,
     ContactPage,
     AdminPage,
-    GentlemenPage
+    GentlemenPage,
+    PersonalityTestPage
 } from './pages';
 import { SUCCESS_STORIES, OFFICES } from './constants';
 
@@ -25,6 +26,7 @@ const App: React.FC = () => {
     // Data state (from API with localStorage fallback)
     const {
         ladies,
+        gentlemen,
         tours,
         loading,
         useApi,
@@ -32,6 +34,32 @@ const App: React.FC = () => {
         setTours,
         registerGentleman
     } = useData();
+
+    // Current user state (for personality test - uses first gentleman or creates demo user)
+    const [currentUser, setCurrentUser] = useState<GentlemanProfile | null>(null);
+
+    // Initialize currentUser when gentlemen loads
+    useEffect(() => {
+        if (!loading && !currentUser) {
+            if (gentlemen.length > 0) {
+                setCurrentUser(gentlemen[0]);
+            } else {
+                // Create a demo user if none exists
+                const demoUser: GentlemanProfile = {
+                    id: 'demo-user',
+                    email: 'demo@example.com',
+                    name: 'Demo User',
+                    age: 35,
+                    profession: 'Professional',
+                    location: 'United States',
+                    bio: 'Demo user for testing personality features',
+                    verified: false,
+                    registrationDate: new Date().toISOString(),
+                };
+                setCurrentUser(demoUser);
+            }
+        }
+    }, [loading, gentlemen, currentUser]);
 
     // Scroll to top on route change
     useEffect(() => {
@@ -91,11 +119,11 @@ const App: React.FC = () => {
                         {/* Ladies Page */}
                         <Route
                             path="/ladies"
-                            element={<LadiesPage ladies={ladies} />}
+                            element={<LadiesPage ladies={ladies} currentUser={currentUser} />}
                         />
                         <Route
                             path="/ladies/:id"
-                            element={<LadiesPage ladies={ladies} />}
+                            element={<LadiesPage ladies={ladies} currentUser={currentUser} />}
                         />
 
                         {/* Tours Page */}
@@ -106,6 +134,19 @@ const App: React.FC = () => {
                         <Route
                             path="/tours/:id"
                             element={<ToursPage tours={tours} />}
+                        />
+
+                        {/* Personality Test */}
+                        <Route
+                            path="/personality"
+                            element={
+                                <PersonalityTestPage
+                                    currentUser={currentUser}
+                                    onUpdateUser={(user) => {
+                                        setCurrentUser(user);
+                                    }}
+                                />
+                            }
                         />
 
                         {/* Extracted Pages */}

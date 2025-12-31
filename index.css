@@ -813,3 +813,347 @@ a:hover {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* =============================================
+   MBTI PERSONALITY TYPE COLOR SYSTEM
+   ============================================= */
+
+:root {
+  /* ANALYSTS (Purple/Indigo family) */
+  --mbti-intj-primary: #6366F1;
+  --mbti-intj-secondary: #818CF8;
+  --mbti-intj-bg: #EEF2FF;
+
+  --mbti-intp-primary: #8B5CF6;
+  --mbti-intp-secondary: #A78BFA;
+  --mbti-intp-bg: #F5F3FF;
+
+  --mbti-entj-primary: #4F46E5;
+  --mbti-entj-secondary: #6366F1;
+  --mbti-entj-bg: #E0E7FF;
+
+  --mbti-entp-primary: #7C3AED;
+  --mbti-entp-secondary: #8B5CF6;
+  --mbti-entp-bg: #EDE9FE;
+
+  /* DIPLOMATS (Green/Teal family) */
+  --mbti-infj-primary: #059669;
+  --mbti-infj-secondary: #10B981;
+  --mbti-infj-bg: #D1FAE5;
+
+  --mbti-infp-primary: #14B8A6;
+  --mbti-infp-secondary: #2DD4BF;
+  --mbti-infp-bg: #CCFBF1;
+
+  --mbti-enfj-primary: #047857;
+  --mbti-enfj-secondary: #059669;
+  --mbti-enfj-bg: #A7F3D0;
+
+  --mbti-enfp-primary: #0D9488;
+  --mbti-enfp-secondary: #14B8A6;
+  --mbti-enfp-bg: #99F6E4;
+
+  /* SENTINELS (Blue family) */
+  --mbti-istj-primary: #2563EB;
+  --mbti-istj-secondary: #3B82F6;
+  --mbti-istj-bg: #DBEAFE;
+
+  --mbti-isfj-primary: #0EA5E9;
+  --mbti-isfj-secondary: #38BDF8;
+  --mbti-isfj-bg: #E0F2FE;
+
+  --mbti-estj-primary: #1D4ED8;
+  --mbti-estj-secondary: #2563EB;
+  --mbti-estj-bg: #BFDBFE;
+
+  --mbti-esfj-primary: #0284C7;
+  --mbti-esfj-secondary: #0EA5E9;
+  --mbti-esfj-bg: #BAE6FD;
+
+  /* EXPLORERS (Orange/Amber family) */
+  --mbti-istp-primary: #EA580C;
+  --mbti-istp-secondary: #F97316;
+  --mbti-istp-bg: #FFEDD5;
+
+  --mbti-isfp-primary: #F59E0B;
+  --mbti-isfp-secondary: #FBBF24;
+  --mbti-isfp-bg: #FEF3C7;
+
+  --mbti-estp-primary: #C2410C;
+  --mbti-estp-secondary: #EA580C;
+  --mbti-estp-bg: #FED7AA;
+
+  --mbti-esfp-primary: #D97706;
+  --mbti-esfp-secondary: #F59E0B;
+  --mbti-esfp-bg: #FDE68A;
+}
+
+/* Theme Classes - Applied to profile cards/modals */
+.mbti-intj { --mbti-primary: var(--mbti-intj-primary); --mbti-secondary: var(--mbti-intj-secondary); --mbti-bg: var(--mbti-intj-bg); }
+.mbti-intp { --mbti-primary: var(--mbti-intp-primary); --mbti-secondary: var(--mbti-intp-secondary); --mbti-bg: var(--mbti-intp-bg); }
+.mbti-entj { --mbti-primary: var(--mbti-entj-primary); --mbti-secondary: var(--mbti-entj-secondary); --mbti-bg: var(--mbti-entj-bg); }
+.mbti-entp { --mbti-primary: var(--mbti-entp-primary); --mbti-secondary: var(--mbti-entp-secondary); --mbti-bg: var(--mbti-entp-bg); }
+.mbti-infj { --mbti-primary: var(--mbti-infj-primary); --mbti-secondary: var(--mbti-infj-secondary); --mbti-bg: var(--mbti-infj-bg); }
+.mbti-infp { --mbti-primary: var(--mbti-infp-primary); --mbti-secondary: var(--mbti-infp-secondary); --mbti-bg: var(--mbti-infp-bg); }
+.mbti-enfj { --mbti-primary: var(--mbti-enfj-primary); --mbti-secondary: var(--mbti-enfj-secondary); --mbti-bg: var(--mbti-enfj-bg); }
+.mbti-enfp { --mbti-primary: var(--mbti-enfp-primary); --mbti-secondary: var(--mbti-enfp-secondary); --mbti-bg: var(--mbti-enfp-bg); }
+.mbti-istj { --mbti-primary: var(--mbti-istj-primary); --mbti-secondary: var(--mbti-istj-secondary); --mbti-bg: var(--mbti-istj-bg); }
+.mbti-isfj { --mbti-primary: var(--mbti-isfj-primary); --mbti-secondary: var(--mbti-isfj-secondary); --mbti-bg: var(--mbti-isfj-bg); }
+.mbti-estj { --mbti-primary: var(--mbti-estj-primary); --mbti-secondary: var(--mbti-estj-secondary); --mbti-bg: var(--mbti-estj-bg); }
+.mbti-esfj { --mbti-primary: var(--mbti-esfj-primary); --mbti-secondary: var(--mbti-esfj-secondary); --mbti-bg: var(--mbti-esfj-bg); }
+.mbti-istp { --mbti-primary: var(--mbti-istp-primary); --mbti-secondary: var(--mbti-istp-secondary); --mbti-bg: var(--mbti-istp-bg); }
+.mbti-isfp { --mbti-primary: var(--mbti-isfp-primary); --mbti-secondary: var(--mbti-isfp-secondary); --mbti-bg: var(--mbti-isfp-bg); }
+.mbti-estp { --mbti-primary: var(--mbti-estp-primary); --mbti-secondary: var(--mbti-estp-secondary); --mbti-bg: var(--mbti-estp-bg); }
+.mbti-esfp { --mbti-primary: var(--mbti-esfp-primary); --mbti-secondary: var(--mbti-esfp-secondary); --mbti-bg: var(--mbti-esfp-bg); }
+
+/* MBTI Badge Styles */
+.mbti-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--mbti-primary, var(--primary));
+  color: white;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.mbti-badge-lg {
+  padding: 8px 20px;
+  font-size: 14px;
+}
+
+.mbti-badge-outline {
+  background: transparent;
+  color: var(--mbti-primary, var(--primary));
+  border: 2px solid var(--mbti-primary, var(--primary));
+}
+
+/* MBTI Card Styling */
+.mbti-card-accent {
+  border-left: 4px solid var(--mbti-primary, var(--primary));
+}
+
+.mbti-header {
+  background: var(--mbti-primary, var(--primary));
+  color: white;
+}
+
+.mbti-glow {
+  box-shadow: 0 0 20px color-mix(in srgb, var(--mbti-primary, var(--primary)) 30%, transparent);
+}
+
+.mbti-bg-tint {
+  background-color: var(--mbti-bg, var(--gray-50));
+}
+
+/* Compatibility Tier Badges */
+.compatibility-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.compatibility-ideal {
+  background: #059669;
+  color: white;
+}
+
+.compatibility-great {
+  background: #10B981;
+  color: white;
+}
+
+.compatibility-good {
+  background: #3B82F6;
+  color: white;
+}
+
+.compatibility-moderate {
+  background: #F59E0B;
+  color: #1F2937;
+}
+
+.compatibility-challenging {
+  background: #EF4444;
+  color: white;
+}
+
+/* Dimension Bars */
+.dimension-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--gray-200);
+  overflow: hidden;
+  position: relative;
+}
+
+.dimension-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.dimension-bar-left {
+  background: linear-gradient(90deg, var(--mbti-primary, var(--primary)) 0%, var(--mbti-secondary, var(--primary-light)) 100%);
+}
+
+.dimension-bar-right {
+  background: linear-gradient(270deg, var(--mbti-primary, var(--primary)) 0%, var(--mbti-secondary, var(--primary-light)) 100%);
+}
+
+/* Personality Test Specific Styles */
+.personality-test-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.question-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+}
+
+.question-option {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  margin: 8px 0;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-size: 15px;
+}
+
+.question-option:hover {
+  border-color: var(--primary);
+  background: var(--gray-50);
+  transform: translateX(4px);
+}
+
+.question-option.selected {
+  border-color: var(--primary);
+  background: rgba(232, 71, 95, 0.08);
+}
+
+.test-progress-bar {
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.test-progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Results Display */
+.results-type-display {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.results-type-badge {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+
+.results-type-name {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: var(--gray-600);
+}
+
+/* Compatibility Score Circle */
+.compatibility-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  position: relative;
+}
+
+.compatibility-circle::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: white;
+}
+
+.compatibility-circle-value {
+  position: relative;
+  z-index: 1;
+  color: var(--gray-800);
+}
+
+/* Animation for test questions */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.question-enter {
+  animation: slideInFromRight 0.4s ease forwards;
+}
+
+/* Tier unlock visual */
+.tier-card {
+  position: relative;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid var(--gray-200);
+  transition: all var(--transition);
+}
+
+.tier-card.unlocked {
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.tier-card.locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tier-card.current {
+  border-color: var(--primary);
+  background: rgba(232, 71, 95, 0.05);
+  box-shadow: var(--shadow-glow);
+}
+
+.tier-lock-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--gray-400);
+}

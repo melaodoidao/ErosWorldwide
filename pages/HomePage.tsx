@@ -87,7 +87,8 @@ export const HomePage: React.FC<HomePageProps> = ({ ladies, tours, stories }) =>
 
                         {/* HERO BANNER */}
                         <div
-                            className="relative rounded-2xl overflow-hidden bg-brand-navy"
+                            className="relative rounded-2xl overflow-hidden"
+                            style={{ background: 'linear-gradient(135deg, #1A1D29 0%, #2D3142 35%, #6B7280 70%, #D1D5DB 100%)' }}
                         >
                             <div className="relative z-10 p-8 lg:p-12">
                                 {/* Badge */}

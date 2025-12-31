@@ -1,24 +1,72 @@
-import React, { useState } from 'react';
-import { Search, Filter, MapPin, CheckCircle, ChevronDown } from 'lucide-react';
-import { LadyProfile } from '../types';
-import { LadyProfileModal } from '../components';
+import React, { useState, useMemo } from 'react';
+import { Search, Filter, MapPin, CheckCircle, ChevronDown, Heart } from 'lucide-react';
+import { LadyProfile, GentlemanProfile } from '../types';
+import { LadyProfileModal, MBTIBadgeCompact } from '../components';
+import { MBTIType, MBTIResult, ALL_MBTI_TYPES } from '../mbti/types';
+import { getMBTITheme } from '../mbti/colors';
+import { calculateCompatibility } from '../mbti/compatibility';
 
 interface LadiesPageProps {
     ladies: LadyProfile[];
+    currentUser?: GentlemanProfile | null;
 }
 
-export const LadiesPage: React.FC<LadiesPageProps> = ({ ladies }) => {
+// Demo MBTI types for ladies (same as in modal)
+const DEMO_MBTI_TYPES: MBTIType[] = ['ENFJ', 'INFP', 'ESFJ', 'ISFJ', 'ENFP', 'INFJ', 'ENTJ', 'INTJ', 'ESFP', 'ISFP', 'ESTJ', 'ISTJ'];
+
+const getDemoMBTIResult = (ladyId: string): MBTIResult => {
+    const index = parseInt(ladyId) % DEMO_MBTI_TYPES.length;
+    const type = DEMO_MBTI_TYPES[index];
+    const getScore = (dominant: boolean) => dominant ? 65 + Math.floor(Math.random() * 25) : 35 - Math.floor(Math.random() * 25);
+
+    return {
+        type,
+        dimensionScores: {
+            E: type[0] === 'E' ? getScore(true) : getScore(false),
+            I: type[0] === 'I' ? getScore(true) : getScore(false),
+            S: type[1] === 'S' ? getScore(true) : getScore(false),
+            N: type[1] === 'N' ? getScore(true) : getScore(false),
+            T: type[2] === 'T' ? getScore(true) : getScore(false),
+            F: type[2] === 'F' ? getScore(true) : getScore(false),
+            J: type[3] === 'J' ? getScore(true) : getScore(false),
+            P: type[3] === 'P' ? getScore(true) : getScore(false),
+        },
+        testTier: 'full',
+        testCompletedAt: new Date().toISOString(),
+        questionsAnswered: 80,
+        confidence: 85,
+    };
+};
+
+export const LadiesPage: React.FC<LadiesPageProps> = ({ ladies, currentUser }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [ageFilter, setAgeFilter] = useState<string>('all');
     const [hairFilter, setHairFilter] = useState<string>('all');
     const [countryFilter, setCountryFilter] = useState<string>('all');
+    const [mbtiFilter, setMbtiFilter] = useState<string>('all');
+    const [sortByCompatibility, setSortByCompatibility] = useState(false);
     const [selectedLady, setSelectedLady] = useState<LadyProfile | null>(null);
 
     // Get unique countries for filter
     const uniqueCountries = [...new Set(ladies.map(l => l.country))];
 
+    // Add MBTI data to ladies (use existing or generate demo)
+    const ladiesWithMBTI = useMemo(() => {
+        return ladies.map(l => ({
+            ...l,
+            mbtiResult: l.mbtiResult || getDemoMBTIResult(l.id),
+        }));
+    }, [ladies]);
+
+    // Calculate compatibility scores if user has MBTI
+    const getCompatibilityScore = (ladyMbti: MBTIResult): number | null => {
+        if (!currentUser?.mbtiResult) return null;
+        const { score } = calculateCompatibility(currentUser.mbtiResult, ladyMbti);
+        return score;
+    };
+
     // Filter ladies
-    const filteredLadies = ladies.filter(l => {
+    const filteredLadies = ladiesWithMBTI.filter(l => {
         const matchesSearch = l.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             l.city.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -30,9 +78,21 @@ export const LadiesPage: React.FC<LadiesPageProps> = ({ ladies }) => {
 
         const matchesHair = hairFilter === 'all' || l.hairColor === hairFilter;
         const matchesCountry = countryFilter === 'all' || l.country === countryFilter;
+        const matchesMBTI = mbtiFilter === 'all' || l.mbtiResult?.type === mbtiFilter;
 
-        return matchesSearch && matchesAge && matchesHair && matchesCountry;
+        return matchesSearch && matchesAge && matchesHair && matchesCountry && matchesMBTI;
     });
+
+    // Sort by compatibility if enabled
+    const sortedLadies = useMemo(() => {
+        if (!sortByCompatibility || !currentUser?.mbtiResult) return filteredLadies;
+
+        return [...filteredLadies].sort((a, b) => {
+            const scoreA = a.mbtiResult ? getCompatibilityScore(a.mbtiResult) : 0;
+            const scoreB = b.mbtiResult ? getCompatibilityScore(b.mbtiResult) : 0;
+            return (scoreB || 0) - (scoreA || 0);
+        });
+    }, [filteredLadies, sortByCompatibility, currentUser?.mbtiResult]);
 
     const handleExpressInterest = (ladyId: string) => {
         alert(`Interest expressed for lady ID: ${ladyId}. Please complete your registration first.`);
@@ -47,6 +107,7 @@ export const LadiesPage: React.FC<LadiesPageProps> = ({ ladies }) => {
                     lady={selectedLady}
                     onClose={() => setSelectedLady(null)}
                     onExpressInterest={handleExpressInterest}
+                    currentUser={currentUser}
                 />
             )}
 
@@ -125,13 +186,44 @@ export const LadiesPage: React.FC<LadiesPageProps> = ({ ladies }) => {
                                 <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                             </div>
 
+                            {/* MBTI Type Filter */}
+                            <div className="relative">
+                                <select
+                                    value={mbtiFilter}
+                                    onChange={(e) => setMbtiFilter(e.target.value)}
+                                    className="appearance-none pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-brand-rose text-sm font-medium text-brand-navy cursor-pointer"
+                                >
+                                    <option value="all">All Personalities</option>
+                                    {ALL_MBTI_TYPES.map(type => (
+                                        <option key={type} value={type}>{type}</option>
+                                    ))}
+                                </select>
+                                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                            </div>
+
+                            {/* Sort by Compatibility */}
+                            {currentUser?.mbtiResult && (
+                                <button
+                                    onClick={() => setSortByCompatibility(!sortByCompatibility)}
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                                        sortByCompatibility
+                                            ? 'bg-brand-rose text-white'
+                                            : 'border border-gray-300 text-gray-600 hover:border-brand-rose hover:text-brand-rose'
+                                    }`}
+                                >
+                                    <Heart size={14} fill={sortByCompatibility ? 'currentColor' : 'none'} />
+                                    Best Matches
+                                </button>
+                            )}
+
                             {/* Clear Filters */}
-                            {(ageFilter !== 'all' || hairFilter !== 'all' || countryFilter !== 'all' || searchQuery) && (
+                            {(ageFilter !== 'all' || hairFilter !== 'all' || countryFilter !== 'all' || mbtiFilter !== 'all' || searchQuery) && (
                                 <button
                                     onClick={() => {
                                         setAgeFilter('all');
                                         setHairFilter('all');
                                         setCountryFilter('all');
+                                        setMbtiFilter('all');
                                         setSearchQuery('');
                                     }}
                                     className="px-4 py-2.5 text-sm font-medium text-brand-rose hover:bg-brand-rose/10 rounded-lg transition-colors"
@@ -144,62 +236,91 @@ export const LadiesPage: React.FC<LadiesPageProps> = ({ ladies }) => {
 
                     {/* Results Count */}
                     <div className="mt-3 text-sm text-gray-500">
-                        Showing <span className="font-bold text-brand-navy">{filteredLadies.length}</span> of {ladies.length} ladies
+                        Showing <span className="font-bold text-brand-navy">{sortedLadies.length}</span> of {ladies.length} ladies
+                        {sortByCompatibility && currentUser?.mbtiResult && (
+                            <span className="ml-2 text-brand-rose">• Sorted by compatibility</span>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Ladies Grid */}
             <div className="max-w-7xl mx-auto px-4 py-8">
-                {filteredLadies.length > 0 ? (
+                {sortedLadies.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {filteredLadies.map((lady) => (
-                            <div
-                                key={lady.id}
-                                onClick={() => setSelectedLady(lady)}
-                                className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group"
-                            >
-                                {/* Photo */}
-                                <div className="relative aspect-[3/4] overflow-hidden">
-                                    <img
-                                        src={lady.imageUrl}
-                                        alt={lady.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400';
-                                        }}
-                                    />
+                        {sortedLadies.map((lady) => {
+                            const compatScore = lady.mbtiResult ? getCompatibilityScore(lady.mbtiResult) : null;
 
-                                    {/* Gradient Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                            return (
+                                <div
+                                    key={lady.id}
+                                    onClick={() => setSelectedLady(lady)}
+                                    className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer group"
+                                >
+                                    {/* Photo */}
+                                    <div className="relative aspect-[3/4] overflow-hidden">
+                                        <img
+                                            src={lady.imageUrl}
+                                            alt={lady.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400';
+                                            }}
+                                        />
 
-                                    {/* Verified Badge */}
-                                    {lady.verified && (
-                                        <div className="absolute top-3 left-3 flex items-center gap-1 bg-green-500 text-white px-2 py-1 rounded-full text-[10px] font-bold uppercase">
-                                            <CheckCircle size={12} />
-                                            Verified
+                                        {/* Gradient Overlay */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+
+                                        {/* Badges Row */}
+                                        <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+                                            {/* Verified Badge */}
+                                            {lady.verified && (
+                                                <div className="flex items-center gap-1 bg-green-500 text-white px-2 py-1 rounded-full text-[10px] font-bold uppercase">
+                                                    <CheckCircle size={12} />
+                                                    Verified
+                                                </div>
+                                            )}
+
+                                            {/* Compatibility Score Badge */}
+                                            {compatScore !== null && (
+                                                <div
+                                                    className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold text-white"
+                                                    style={{
+                                                        backgroundColor: compatScore >= 70 ? '#10B981' : compatScore >= 50 ? '#3B82F6' : '#F59E0B'
+                                                    }}
+                                                >
+                                                    <Heart size={10} fill="currentColor" />
+                                                    {compatScore}%
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
 
-                                    {/* Info Overlay */}
-                                    <div className="absolute bottom-3 left-3 right-3 text-white">
-                                        <h3 className="text-lg font-bold">{lady.name}, {lady.age}</h3>
-                                        <div className="flex items-center text-sm opacity-90">
-                                            <MapPin size={12} className="mr-1" />
-                                            {lady.city}, {lady.country}
+                                        {/* Info Overlay */}
+                                        <div className="absolute bottom-3 left-3 right-3 text-white">
+                                            <h3 className="text-lg font-bold">{lady.name}, {lady.age}</h3>
+                                            <div className="flex items-center text-sm opacity-90">
+                                                <MapPin size={12} className="mr-1" />
+                                                {lady.city}, {lady.country}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Quick Info with MBTI */}
+                                    <div className="p-3 text-sm">
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-gray-500">
+                                                <span>{lady.height}</span>
+                                                <span className="mx-1">•</span>
+                                                <span>{lady.hairColor}</span>
+                                            </div>
+                                            {lady.mbtiResult && (
+                                                <MBTIBadgeCompact type={lady.mbtiResult.type} />
+                                            )}
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Quick Info */}
-                                <div className="p-3 text-sm">
-                                    <div className="flex items-center justify-between text-gray-500">
-                                        <span>{lady.height}</span>
-                                        <span>{lady.hairColor}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-16">
